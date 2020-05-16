@@ -66,7 +66,7 @@ The resistance difference is usually minor, but one can account for it
 if they wish. While the device is powered and running, use a
 multimeter to measure the actual voltage across the battery terminals.
 Compare this voltage with the voltage reported by the software and
-update the 'Voltage scale' parameter in the "menuconfig" tool
+update the `Voltage scale` parameter in the "menuconfig" tool
 accordingly.
 
 Over-the-air flash
