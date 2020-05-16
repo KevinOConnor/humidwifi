@@ -43,11 +43,31 @@ Minimizing the radio time greatly reduces the battery drain.
 
 The software performs all uploads via an MQTT server. It should be
 possible to configure the MQTT URI to use a username/password and/or
-to use an TLS encrypted connection. The code does not currently have a
+to use a TLS encrypted connection. The code does not currently have a
 method to store TLS certificates however. The code does set the MQTT
 "retain" flag, which may not be compatible with some "cloud" MQTT
 servers. It should work with a local
 [Mosquitto MQTT](https://mosquitto.org/) server.
+
+Battery measurement
+===================
+
+The firmware uses an esp32 "trick" to measure the battery voltage. It
+enables both the pullup and pulldown resistors of an unconnected ADC2
+pin and then performs an ADC measurement. The pullup/pulldown
+resistors form a "voltage divisor" which can be used to measure the
+battery voltage. In theory, this "trick" would result in an ADC
+reading that is half the battery voltage and therefore one would scale
+this value by a factor of 2.0 to obtain the actual battery voltage.
+However, the on-chip pullup/pulldown resistors may have slightly
+different resistances.
+
+The resistance difference is usually minor, but one can account for it
+if they wish. While the device is powered and running, use a
+multimeter to measure the actual voltage across the battery terminals.
+Compare this voltage with the voltage reported by the software and
+update the 'Voltage scale' parameter in the "menuconfig" tool
+accordingly.
 
 Over-the-air flash
 ==================
