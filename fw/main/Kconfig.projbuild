@@ -1,0 +1,106 @@
+menu "Application settings for 'humidity wifi' project"
+
+    config MEASURE_INTERVAL
+        int "Time between measurements (in seconds)"
+        default 300
+
+    config UPLOAD_INTERVAL
+        int "Time between uploads (in seconds)"
+        default 900
+
+    config MAX_RUN_TIME
+        int "Maximum time (in seconds) before aborting measurement/upload"
+        default 5
+
+    config MAX_OTA_TIME
+        int "Maximum time (in seconds) before aborting ota flash update"
+        default 300
+
+    menu "Battery check"
+
+    config BATTERY_CHANNEL
+        int "ADC2 Channel to measure battery voltage on"
+        default 4
+
+    config VOLTAGE_SCALE
+        string "Voltage scale"
+        default "2.0"
+        help
+            An amount to scale the battery voltage measurements.
+
+    config VOLTAGE_CUTOFF
+        string "Voltage cutoff"
+        default "2.9"
+        help
+            Minimum voltage before chip ceases taking measurements.
+
+    endmenu
+
+    menu "BME280"
+
+    config BME280_I2C_ADDR
+        hex "I2C address of BME280 chip"
+        default 0x76
+
+    config BME280_SDA_GPIO
+        int "GPIO pin number of the line connected to BME280 SDA pin"
+        default 15
+
+    config BME280_SCL_GPIO
+        int "GPIO pin number of the line connected to BME280 SCL pin"
+        default 4
+
+    endmenu
+
+    menu "Networking configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "myssid"
+        help
+            SSID (network name) for the example to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "mypassword"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+            Can be left blank if the network has no security set.
+
+    config BROKER_URL
+        string "Broker URL"
+        default "mqtt://mqtt.eclipse.org"
+        help
+            URL of the broker to connect to
+
+    config MQTT_TOPIC_PREFIX
+        string "Prefix to use for MQTT topic"
+        default "topic"
+
+    config USE_STATIC_IP
+        bool "Use static IP addresses"
+        default y
+
+    if USE_STATIC_IP
+
+    config IP_ADDRESS
+        string "Device IP address"
+        default "192.168.1.22"
+
+    config NETMASK
+        string "Network mask"
+        default "255.255.255.0"
+
+    config GATEWAY_IP
+        string "IP address of default gateway"
+        default "192.168.1.1"
+
+    config DNS_IP
+        string "IP address of dns server"
+        default "192.168.1.1"
+
+    endif
+
+    endmenu
+
+endmenu
