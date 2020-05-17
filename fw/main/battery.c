@@ -7,6 +7,7 @@
 #include <stdio.h> // snprintf
 #include <driver/adc.h> // adc2_get_raw
 #include <driver/gpio.h> // gpio_pullup_en
+#include <esp_adc_cal.h> // esp_adc_cal_raw_to_voltage
 #include <esp_log.h> // ESP_LOGI
 #include "battery.h" // battery_sense
 #include "datalog.h" // datalog_append
@@ -44,13 +45,16 @@ battery_sense(void)
     gpio_pullup_dis(g);
     gpio_pulldown_dis(g);
 
-    // XXX - voltage calibrate
-
-    float fvalue = value * atof(CONFIG_VOLTAGE_SCALE) * 2.2f / 4095.0f;
+    // Calculate a calibrated voltage from adc value
+    esp_adc_cal_characteristics_t calibration;
+    int ret = esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_6
+                                       , ADC_WIDTH_12Bit, 1100, &calibration);
+    int millivolt = esp_adc_cal_raw_to_voltage(value, &calibration);
+    float fvalue = millivolt * (atof(CONFIG_VOLTAGE_SCALE) / 1000.0f);
     datalog_append(&battery_info, &fvalue);
+    ESP_LOGW(TAG, "Got %.3f %d %d", fvalue, ret, value);
 
-    ESP_LOGW(TAG, "Got %.3f", fvalue);
-
+    // Preserve battery if voltage below cutoff
     if (fvalue < atof(CONFIG_VOLTAGE_CUTOFF))
         deepsleep_shutdown();
 }

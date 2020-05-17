@@ -24,7 +24,7 @@ menu "Application settings for 'humidity wifi' project"
 
     config VOLTAGE_SCALE
         string "Voltage scale"
-        default "2.0"
+        default "2.2"
         help
             An amount to scale the battery voltage measurements.
 
