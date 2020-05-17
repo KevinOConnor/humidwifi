@@ -5,11 +5,10 @@
 // This file may be distributed under the terms of the GNU GPLv3 license.
 
 #include <esp_log.h> // ESP_LOGI
+#include <esp_netif.h> // esp_netif_init
 #include <esp_wifi.h> // esp_wifi_init
-#include <lwip/dns.h> // dns_setserver
 #include <lwip/inet.h> // inet_aton
 #include <nvs_flash.h> // nvs_flash_init
-#include <tcpip_adapter.h> // tcpip_adapter_init
 #include "deepsleep.h" // deepsleep_start_sleep()
 #include "network.h" // network_connect
 #include "sdkconfig.h" // CONFIG_WIFI_SSID
@@ -42,37 +41,43 @@ fail:
 static int
 ip_init(void)
 {
-#if CONFIG_USE_STATIC_IP
-    int ret = tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA);
+    int ret = esp_netif_init();
     if (ret)
         goto fail;
-    tcpip_adapter_ip_info_t ipInfo;
-    ret = inet_aton(CONFIG_IP_ADDRESS, &ipInfo.ip);
+    esp_netif_t *netif = esp_netif_create_default_wifi_sta();
+    if (!netif)
+        goto fail;
+
+#if CONFIG_USE_STATIC_IP
+    ret = esp_netif_dhcpc_stop(netif);
+    if (ret)
+        goto fail;
+    esp_netif_ip_info_t ip_info;
+    ret = inet_aton(CONFIG_IP_ADDRESS, &ip_info.ip);
     if (ret != 1)
         goto fail;
-    ret = inet_aton(CONFIG_NETMASK, &ipInfo.netmask);
+    ret = inet_aton(CONFIG_NETMASK, &ip_info.netmask);
     if (ret != 1)
         goto fail;
-    ret = inet_aton(CONFIG_GATEWAY_IP, &ipInfo.gw);
+    ret = inet_aton(CONFIG_GATEWAY_IP, &ip_info.gw);
     if (ret != 1)
         goto fail;
-    ret = tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);
+    ret = esp_netif_set_ip_info(netif, &ip_info);
     if (ret)
         goto fail;
 
-    ip_addr_t d;
-    d.type = IPADDR_TYPE_V4;
-    ret = inet_aton(CONFIG_DNS_IP, &d.u_addr.ip4);
+    esp_netif_dns_info_t dns_info;
+    ret = inet_aton(CONFIG_DNS_IP, &dns_info.ip);
     if (ret != 1)
         goto fail;
-    dns_setserver(0, &d);
+    esp_netif_set_dns_info(netif, ESP_NETIF_DNS_MAIN, &dns_info);
+#endif
 
     return 0;
 
 fail:
     ESP_LOGW(TAG, "Error in ip_init %d", ret);
     return ret;
-#endif
 }
 
 static RTC_DATA_ATTR uint8_t last_channel;
@@ -103,7 +108,6 @@ network_start(void)
     int ret = esp32_init();
     if (ret)
         goto fail;
-    tcpip_adapter_init();
     ret = ip_init();
     if (ret)
         goto fail;
