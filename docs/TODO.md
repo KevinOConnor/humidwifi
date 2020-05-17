@@ -24,7 +24,8 @@ PCB
 * Minor routing changes: Move the "3.2V lifepo4 warning" so that it
   can be seen after the battery holder is soldered on; possibly change
   the order of the debug pins to match some common esp32 debug devices
-  (gnd, gpio0, vcc, tx, rx, rst).
+  (gnd, gpio0, vcc, tx, rx, rst); possibly route GPIO15 to GND to
+  suppress rom boot debug messages.
 
 Firmware
 ========
