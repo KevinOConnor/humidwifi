@@ -87,7 +87,7 @@ bme280_format(void *data, char *buf, int size)
 {
     struct bme280_s *b = data;
     return snprintf(buf, size
-                    , "\"temperature\":%.1f,\"pressure\":%.1f,\"humidity\":%.1f"
+                    , "\"temperature\":%.2f,\"pressure\":%.1f,\"humidity\":%.1f"
                     , b->temperature, b->pressure, b->humidity);
 }
 
@@ -174,12 +174,6 @@ fail:
     return ret;
 }
 
-// XXX
-#define DIV_ROUND_CLOSEST(x, divisor)({                 \
-            typeof(divisor) __divisor = divisor;        \
-            (((x) + ((__divisor) / 2)) / (__divisor));  \
-        })
-
 // Calculate temperature (formula from bme280 spec)
 static int32_t
 bme280_calc_t_fine(uint8_t *data)
@@ -197,7 +191,7 @@ bme280_calc_t_fine(uint8_t *data)
 static float
 bme280_calc_temp(int32_t t_fine)
 {
-    return DIV_ROUND_CLOSEST(t_fine * 5, 256) / 100.0f;
+    return t_fine / 5120.0f;
 }
 
 // Calculate pressure (formula from bme280 spec)
@@ -288,7 +282,7 @@ bme280_sense(void)
     b.temperature = bme280_calc_temp(t_fine);
     b.pressure = bme280_calc_pressure(t_fine, &data[0]);
     b.humidity = bme280_calc_humidity(t_fine, &data[6]);
-    ESP_LOGW(TAG, "append %.1f %.1f %.1f"
+    ESP_LOGW(TAG, "append %.2f %.1f %.1f"
              , b.temperature, b.pressure, b.humidity);
     datalog_append(&bme280_info, &b);
     return;
