@@ -17,9 +17,7 @@ docker run --rm -v ./fw:/project -w /project -it espressif/idf:release-v4.1 idf.
 
 In the menuconfig step, be sure to enter the `Application settings for
 'humidity wifi' project` and configure the appropriate MQTT and
-network settings. It is recommended to use a static IP address for the
-device as this greatly reduces the time it takes for the device to
-connect.
+network settings.
 
 After configuring and building the software it will be necessary to
 flash the software to the board. This can be done by running something

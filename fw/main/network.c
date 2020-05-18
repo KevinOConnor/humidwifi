@@ -7,7 +7,6 @@
 #include <esp_log.h> // ESP_LOGI
 #include <esp_netif.h> // esp_netif_init
 #include <esp_wifi.h> // esp_wifi_init
-#include <lwip/inet.h> // inet_aton
 #include <nvs_flash.h> // nvs_flash_init
 #include "deepsleep.h" // deepsleep_start_sleep()
 #include "network.h" // network_connect
@@ -37,6 +36,28 @@ fail:
     return ret;
 }
 
+static RTC_DATA_ATTR esp_netif_ip_info_t Last_ip_info;
+static RTC_DATA_ATTR esp_netif_dns_info_t Last_dns_info;
+static RTC_DATA_ATTR uint8_t Have_ip;
+
+static void
+on_got_ip(void *arg, esp_event_base_t event_base
+          , int32_t event_id, void *event_data)
+{
+    esp_netif_t *netif = arg;
+    int ret = esp_netif_get_ip_info(netif, &Last_ip_info);
+    if (ret)
+        goto fail;
+    ret = esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &Last_dns_info);
+    if (ret)
+        goto fail;
+    Have_ip = 1;
+    return;
+
+fail:
+    ESP_LOGW(TAG, "Error in on_got_ip %d", ret);
+}
+
 // Initialize tcp/ip
 static int
 ip_init(void)
@@ -47,31 +68,25 @@ ip_init(void)
     esp_netif_t *netif = esp_netif_create_default_wifi_sta();
     if (!netif)
         goto fail;
+    if (!Have_ip) {
+        if (CONFIG_REUSE_IP) {
+            ret = esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP
+                                             , &on_got_ip, netif);
+            if (ret)
+                goto fail;
+        }
+        return 0;
+    }
 
-#if CONFIG_USE_STATIC_IP
     ret = esp_netif_dhcpc_stop(netif);
     if (ret)
         goto fail;
-    esp_netif_ip_info_t ip_info;
-    ret = inet_aton(CONFIG_IP_ADDRESS, &ip_info.ip);
-    if (ret != 1)
-        goto fail;
-    ret = inet_aton(CONFIG_NETMASK, &ip_info.netmask);
-    if (ret != 1)
-        goto fail;
-    ret = inet_aton(CONFIG_GATEWAY_IP, &ip_info.gw);
-    if (ret != 1)
-        goto fail;
-    ret = esp_netif_set_ip_info(netif, &ip_info);
+    ret = esp_netif_set_ip_info(netif, &Last_ip_info);
     if (ret)
         goto fail;
-
-    esp_netif_dns_info_t dns_info;
-    ret = inet_aton(CONFIG_DNS_IP, &dns_info.ip);
-    if (ret != 1)
+    ret = esp_netif_set_dns_info(netif, ESP_NETIF_DNS_MAIN, &Last_dns_info);
+    if (ret)
         goto fail;
-    esp_netif_set_dns_info(netif, ESP_NETIF_DNS_MAIN, &dns_info);
-#endif
 
     return 0;
 
@@ -80,14 +95,14 @@ fail:
     return ret;
 }
 
-static RTC_DATA_ATTR uint8_t last_channel;
+static RTC_DATA_ATTR uint8_t Last_channel;
 
 static void
 on_wifi_connect(void *arg, esp_event_base_t event_base
                 , int32_t event_id, void *event_data)
 {
     wifi_event_sta_connected_t *e = event_data;
-    last_channel = e->channel;
+    Last_channel = e->channel;
 }
 
 static int no_sleep_on_disconnect;
@@ -131,7 +146,7 @@ network_start(void)
         .sta = {
             .ssid = CONFIG_WIFI_SSID,
             .password = CONFIG_WIFI_PASSWORD,
-            .channel = last_channel,
+            .channel = Last_channel,
         },
     };
     ESP_LOGI(TAG, "Connecting to %s...", wifi_config.sta.ssid);
