@@ -138,6 +138,9 @@ mqtt_start(void)
         count++;
     }
 
+    // Wait for ota publish ack
+    ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
+
     // Wait for acks from sent data
     while (count--) {
         ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
@@ -145,7 +148,6 @@ mqtt_start(void)
     }
 
     // Wait for ota check to complete
-    ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
     xEventGroupWaitBits(ota_event_group, OTA_CHECK_EVENT
                         , true, true, portMAX_DELAY);
     esp_mqtt_client_stop(client);
