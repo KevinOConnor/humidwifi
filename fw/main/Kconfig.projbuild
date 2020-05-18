@@ -77,13 +77,14 @@ menu "Application settings for 'humidity wifi' project"
         string "Prefix to use for MQTT topic"
         default "topic"
 
-    config REUSE_IP
-        bool "Assume infinite DHCP lease"
-        default y
+    config DHCP_LEASE_HOURS
+        int "Number of hours to keep DHCP lease"
+        default 48
         help
-            When enabled, the IP information for the device will be
-            obtained using DHCP and that information will be used for
-            future connections.
+            Set to zero to request IP information (via DHCP) on every
+            connection.  Setting this to a non-zero value will cause
+            previously obtained IP information to be used on future
+            connections.
 
             Enabling this option significantly reduces the time it
             takes to establish a wifi connection which improves

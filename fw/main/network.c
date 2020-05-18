@@ -38,7 +38,7 @@ fail:
 
 static RTC_DATA_ATTR esp_netif_ip_info_t Last_ip_info;
 static RTC_DATA_ATTR esp_netif_dns_info_t Last_dns_info;
-static RTC_DATA_ATTR uint8_t Have_ip;
+static RTC_DATA_ATTR uint64_t Last_ip_valid_time;
 
 static void
 on_got_ip(void *arg, esp_event_base_t event_base
@@ -51,7 +51,8 @@ on_got_ip(void *arg, esp_event_base_t event_base
     ret = esp_netif_get_dns_info(netif, ESP_NETIF_DNS_MAIN, &Last_dns_info);
     if (ret)
         goto fail;
-    Have_ip = 1;
+    uint64_t vtime = CONFIG_DHCP_LEASE_HOURS * 60ULL * 60 * 1000000;
+    Last_ip_valid_time = deepsleep_get_wake_time() + vtime;
     return;
 
 fail:
@@ -68,13 +69,11 @@ ip_init(void)
     esp_netif_t *netif = esp_netif_create_default_wifi_sta();
     if (!netif)
         goto fail;
-    if (!Have_ip) {
-        if (CONFIG_REUSE_IP) {
-            ret = esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP
-                                             , &on_got_ip, netif);
-            if (ret)
-                goto fail;
-        }
+    if (deepsleep_get_wake_time() >= Last_ip_valid_time) {
+        ret = esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP
+                                         , &on_got_ip, netif);
+        if (ret)
+            goto fail;
         return 0;
     }
 
