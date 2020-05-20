@@ -110,10 +110,11 @@ static void
 on_wifi_disconnect(void *arg, esp_event_base_t event_base
                    , int32_t event_id, void *event_data)
 {
+    if (no_sleep_on_disconnect)
+        return;
     wifi_event_sta_disconnected_t *e = event_data;
     ESP_LOGW(TAG, "Wifi disconnect %d", e->reason);
-    if (!no_sleep_on_disconnect)
-        deepsleep_start_sleep();
+    deepsleep_start_sleep();
 }
 
 int
@@ -175,9 +176,9 @@ void
 network_disconnect(void)
 {
     no_sleep_on_disconnect = 1;
-    int ret = esp_wifi_stop();
-    if (ret != ESP_ERR_WIFI_NOT_INIT)
-        esp_wifi_deinit();
+    int ret = esp_wifi_disconnect();
+    if (ret)
+        ESP_LOGW(TAG, "Error in network_disconnect %d", ret);
 }
 
 void

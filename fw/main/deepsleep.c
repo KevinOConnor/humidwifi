@@ -7,6 +7,7 @@
 #include <sys/time.h> // gettimeofday
 #include <driver/rtc_io.h> // rtc_gpio_isolate
 #include <esp_sleep.h> // esp_deep_sleep_start
+#include <esp_wifi.h> // esp_wifi_stop
 #include <freertos/FreeRTOS.h> // xTaskCreate
 #include <freertos/task.h> // xTaskCreate
 #include "deepsleep.h" // deepsleep_init
@@ -46,29 +47,28 @@ get_usecs(void)
     return (uint64_t)now.tv_sec * 1000000 + now.tv_usec;
 }
 
-static void
-enter_deepsleep(void)
-{
-    esp_deep_sleep_disable_rom_logging();
-    esp_sleep_enable_timer_wakeup(CONFIG_MEASURE_INTERVAL * 1000000);
-    last_deepsleep_time = get_usecs();
-    esp_deep_sleep_start();
-}
-
 static TaskHandle_t deepsleep_task_id;
 static uint64_t force_deepsleep_time;
 
 static void
 deepsleep_task(void *pvParameter)
 {
+    // Wait until ready for deepsleep
     uint32_t sleep_time = CONFIG_MAX_RUN_TIME * 1000 / portTICK_PERIOD_MS;
     for (;;) {
         ulTaskNotifyTake(pdFALSE, sleep_time);
         uint64_t curtime = get_usecs(), fdt = force_deepsleep_time;
         if (curtime >= fdt)
-            enter_deepsleep();
+            break;
         sleep_time = (fdt - curtime) / (1000 * portTICK_PERIOD_MS);
     }
+
+    // Enter deepsleep
+    esp_wifi_stop();
+    esp_deep_sleep_disable_rom_logging();
+    esp_sleep_enable_timer_wakeup(CONFIG_MEASURE_INTERVAL * 1000000);
+    last_deepsleep_time = get_usecs();
+    esp_deep_sleep_start();
 }
 
 void
@@ -101,6 +101,7 @@ deepsleep_start_sleep(void)
 void
 deepsleep_shutdown(void)
 {
+    esp_wifi_stop();
     for (int i=0; i<ESP_PD_DOMAIN_MAX; i++)
         esp_sleep_pd_config(i, ESP_PD_OPTION_OFF);
     esp_deep_sleep_start();
