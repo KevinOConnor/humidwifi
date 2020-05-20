@@ -151,6 +151,7 @@ mqtt_start(void)
     xEventGroupWaitBits(ota_event_group, OTA_CHECK_EVENT
                         , true, true, portMAX_DELAY);
     esp_mqtt_client_stop(client);
+    esp_mqtt_client_disconnect(client);
     if (ota_in_progress)
         vTaskDelay(portMAX_DELAY);
 }
