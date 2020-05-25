@@ -76,7 +76,7 @@ MQTT topic (where `topic` is the topic prefix specified in
 menuconfig). The URL should be an http (or https) link. For example:
 
 ```
-mosquitto_pub -t "topic/ota_url" -m "http://myserver:8080/mqtt_tcp.bin" -r
+mosquitto_pub -t "topic/ota_url" -m "http://myserver:8080/humidwifi.bin" -r
 ```
 
 When the device next attempts to upload values, it will look for that
