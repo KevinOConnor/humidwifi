@@ -49,7 +49,6 @@ get_usecs(void)
 static void
 enter_deepsleep(void)
 {
-    rtc_gpio_isolate(GPIO_NUM_12);
     esp_deep_sleep_disable_rom_logging();
     esp_sleep_enable_timer_wakeup(CONFIG_MEASURE_INTERVAL * 1000000);
     last_deepsleep_time = get_usecs();
