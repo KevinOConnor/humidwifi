@@ -22,13 +22,23 @@ menu "Application settings for 'humidity wifi' project"
         int "ADC2 Channel to measure battery voltage on"
         default 4
 
-    config VOLTAGE_SCALE
-        string "Voltage scale"
-        default "2.2"
+    config BATTERY_SCALE
+        string "Battery voltage scale"
+        default "2.0"
         help
-            An amount to scale the battery voltage measurements.
+            Amount to scale the battery voltage measurements to
+            account for per-board differences in adc and resistors.
 
-    config VOLTAGE_CUTOFF
+    config BATTERY_OFFSET
+        string "Battery voltage offset"
+        default "0.089"
+        help
+            Actual voltage when the adc unit reports zero. The esp-idf
+            framework defaults to 0.089V for adc2 measurements with
+            "6db attenuation". A custom per-board setting may be
+            specified.
+
+    config BATTERY_CUTOFF
         string "Voltage cutoff"
         default "2.9"
         help
