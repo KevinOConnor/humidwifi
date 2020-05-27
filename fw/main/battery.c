@@ -22,7 +22,7 @@ battery_format(void *data, char *buf, int size)
     return snprintf(buf, size, "\"battery\":%.3f", *fvalue);
 }
 
-const struct datalog_type_s battery_info = {
+static const struct datalog_type_s battery_info = {
     .length = sizeof(float),
     .format = battery_format,
 };

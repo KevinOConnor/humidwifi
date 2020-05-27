@@ -235,7 +235,7 @@ bme280_format(void *data, char *buf, int size)
                     , b->temperature, b->pressure, b->humidity);
 }
 
-const struct datalog_type_s bme280_info = {
+static const struct datalog_type_s bme280_info = {
     .length = sizeof(struct bme280_s),
     .format = bme280_format,
 };

@@ -40,7 +40,7 @@ appwake_format(void *data, char *buf, int size)
                     , aw->waketime, aw->sleeptime, latest);
 }
 
-const struct datalog_type_s appwake_info = {
+static const struct datalog_type_s appwake_info = {
     .length = sizeof(struct appwake_s),
     .format = appwake_format,
 };
