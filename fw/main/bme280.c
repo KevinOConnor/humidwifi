@@ -153,7 +153,7 @@ fail:
 static int32_t
 bme280_calc_t_fine(uint8_t *data)
 {
-    int32_t adc_T = (data[0] << 12) | (data[1] << 4) | (data[2] >> 4);
+    int32_t adc_T = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4);
     int32_t dig_T1 = calib.dig_T1, dig_T2 = calib.dig_T2, dig_T3 = calib.dig_T3;
 
     int32_t var1 = (((adc_T >> 3) - (dig_T1 << 1)) * dig_T2) >> 11;
@@ -164,7 +164,7 @@ bme280_calc_t_fine(uint8_t *data)
 
 // Convert temperature to float
 static float
-bme280_calc_temp(int32_t t_fine)
+bme280_calc_temperature(int32_t t_fine)
 {
     return t_fine / 5120.0f;
 }
@@ -199,7 +199,7 @@ bme280_calc_pressure(int32_t t_fine, uint8_t *data)
 static float
 bme280_calc_humidity(int32_t t_fine, uint8_t *data)
 {
-    int32_t adc_H = (data[0] << 8) | data[1];
+    int32_t adc_H = (data[6] << 8) | data[7];
     int32_t dig_H1 = calib.dig_H1, dig_H2 = calib.dig_H2, dig_H3 = calib.dig_H3;
     int32_t dig_H4 = calib.dig_H4, dig_H5 = calib.dig_H5, dig_H6 = calib.dig_H6;
 
@@ -278,10 +278,10 @@ bme280_sense(void)
 
     // Calculate calibrated data and add to datalog
     struct bme280_s b;
-    int32_t t_fine = bme280_calc_t_fine(&data[3]);
-    b.temperature = bme280_calc_temp(t_fine);
-    b.pressure = bme280_calc_pressure(t_fine, &data[0]);
-    b.humidity = bme280_calc_humidity(t_fine, &data[6]);
+    int32_t t_fine = bme280_calc_t_fine(data);
+    b.temperature = bme280_calc_temperature(t_fine);
+    b.pressure = bme280_calc_pressure(t_fine, data);
+    b.humidity = bme280_calc_humidity(t_fine, data);
     ESP_LOGW(TAG, "append %.2f %.1f %.1f"
              , b.temperature, b.pressure, b.humidity);
     datalog_append(&bme280_info, &b);
