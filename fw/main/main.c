@@ -48,10 +48,9 @@ static const struct datalog_type_s appwake_info = {
 static void
 waketime_sense(void)
 {
-    uint64_t waketime = deepsleep_get_wake_time();
     struct appwake_s aw = {
-        .waketime = waketime,
-        .sleeptime = deepsleep_get_sleep_time()
+        .waketime = deepsleep_get_wake_time(),
+        .sleeptime = deepsleep_get_sleep_time(),
     };
     datalog_append(&appwake_info, &aw);
 }
