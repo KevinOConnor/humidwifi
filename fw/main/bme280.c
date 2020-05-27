@@ -75,29 +75,6 @@ i2c_read(uint8_t reg, uint8_t *data, int len)
 
 
 /****************************************************************
- * BME280 datalog entry
- ****************************************************************/
-
-struct bme280_s {
-    float temperature, pressure, humidity;
-};
-
-static int
-bme280_format(void *data, char *buf, int size)
-{
-    struct bme280_s *b = data;
-    return snprintf(buf, size
-                    , "\"temperature\":%.2f,\"pressure\":%.1f,\"humidity\":%.1f"
-                    , b->temperature, b->pressure, b->humidity);
-}
-
-const struct datalog_type_s bme280_info = {
-    .length = sizeof(struct bme280_s),
-    .format = bme280_format,
-};
-
-
-/****************************************************************
  * BME280 calibration and config
  ****************************************************************/
 
@@ -121,9 +98,7 @@ struct bme280_calibration_s {
     int16_t dig_H5;
     int8_t dig_H6;
 };
-
 static RTC_DATA_ATTR struct bme280_calibration_s calib;
-static RTC_DATA_ATTR uint8_t did_init;
 
 static inline uint16_t load_short(uint8_t *p) {
     return (p[1] << 8) | p[0];
@@ -244,8 +219,33 @@ bme280_calc_humidity(int32_t t_fine, uint8_t *data)
 
 
 /****************************************************************
+ * BME280 datalog entry
+ ****************************************************************/
+
+struct bme280_s {
+    float temperature, pressure, humidity;
+};
+
+static int
+bme280_format(void *data, char *buf, int size)
+{
+    struct bme280_s *b = data;
+    return snprintf(buf, size
+                    , "\"temperature\":%.2f,\"pressure\":%.1f,\"humidity\":%.1f"
+                    , b->temperature, b->pressure, b->humidity);
+}
+
+const struct datalog_type_s bme280_info = {
+    .length = sizeof(struct bme280_s),
+    .format = bme280_format,
+};
+
+
+/****************************************************************
  * Sensing
  ****************************************************************/
+
+static RTC_DATA_ATTR uint8_t did_init;
 
 void
 bme280_sense(void)
