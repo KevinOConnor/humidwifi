@@ -1,6 +1,11 @@
 // Case for storing humidity sensor
 //
 // Copyright (C) 2020  Kevin O'Connor <kevin@koconnor.net>
+//
+// This file may be distributed under the terms of the GNU GPLv3 license.
+
+// Generate STL using OpenSCAD:
+//   openscad humcase.scad -o humcase.stl
 
 pcb_width = 28;
 pcb_thick = 1.6;
@@ -52,8 +57,19 @@ module lid_frame(width, thick) {
     }
 }
 
+module battery_air_hole(x, y) {
+    translate([x, y, -CUT])
+        cylinder(h=lid_height + 2*CUT, d=air_hole_diameter, $fs=.5);
+}
+
+batt_hole_y = extra_thick + esp_thick + pcb_thick + wall_width + batt_thick/2;
+
 module lid() {
-    lid_frame(pcb_width, batt_thick + esp_thick + extra_thick + wall_width);
+    difference() {
+        lid_frame(pcb_width, batt_thick + esp_thick + extra_thick + wall_width);
+        battery_air_hole(6, batt_hole_y);
+        battery_air_hole(pcb_width-6, batt_hole_y);
+    }
 }
 
 module case() {
@@ -87,6 +103,8 @@ module case() {
     module main_box() {
         box();
         pcb_guide(4);
+        pcb_guide(15);
+        pcb_guide(pcb_length-15);
         pcb_guide(pcb_length-4);
     }
     module air_hole(x, z) {
@@ -104,6 +122,8 @@ module case() {
     difference() {
         main_box();
         air_holes([8, 18, 28, 38, 48]);
+        battery_air_hole(wall_width + slack / 2 + 6, batt_hole_y);
+        battery_air_hole(width + wall_width - slack / 2 - 6, batt_hole_y);
     }
 }
 

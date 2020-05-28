@@ -10,8 +10,7 @@ PCB
   that the battery may be acting as a "heat sink" which may limit the
   responsiveness of the bme280 temperature measurements. Ideally the
   bme280 chip would be moved to the edge of the board and would not
-  have a ground fill near it. Also, the case should have vent holes
-  for the battery side of the pcb.
+  have a ground fill near it.
 
 * Add an SMT mounted push-button device to the board. A button could
   allow for improved user interaction during configuration and code
