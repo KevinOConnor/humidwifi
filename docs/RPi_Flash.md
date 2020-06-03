@@ -17,8 +17,8 @@ installed.
 Make these connections:
 ```
 GND   -> RPi GND  (Pin 6)
-Tx    -> RPi Rx   (Pin 8)
-Rx    -> RPi Tx   (Pin 10)
+Tx    -> RPi Rx   (Pin 10)
+Rx    -> RPi Tx   (Pin 8)
 Boot  -> RPi GND  (Pin 14)
 Reset -> Not connected
 3.3V  -> RPi 3.3V (Pin 1)
