@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Script to graph log of MQTT data
 #
 # Copyright (C) 2020  Kevin O'Connor <kevin@koconnor.net>
@@ -13,7 +13,7 @@ import matplotlib, numpy as np
 MEASUREMENTS = ['battery', 'temperature', 'pressure', 'humidity']
 
 def parse_log(logname, timestamp_info):
-    f = open(logname, 'rb')
+    f = open(logname, 'r')
     ts_base = 24. * 60. * 60. * 1000000.
     out = []
     for line in f:
