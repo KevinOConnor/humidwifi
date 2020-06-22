@@ -5,7 +5,7 @@
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import optparse, datetime, math, json
-import matplotlib, numpy as np
+import matplotlib
 
 # To use this script, create an MQTT log with something like:
 #  mosquitto_sub -F '%I;%t;%p' -t 'topic/data' > mylog &
@@ -14,9 +14,10 @@ MEASUREMENTS = ['battery', 'temperature', 'pressure', 'humidity']
 
 def parse_log(logname, timestamp_info):
     f = open(logname, 'r')
-    ts_base = 24. * 60. * 60. * 1000000.
+    ts_base = 1. / (24. * 60. * 60. * 1000000.)
     out = []
     for line in f:
+        # Parse line
         parts = line.split(';')
         if len(parts) != 3:
             continue
@@ -28,18 +29,40 @@ def parse_log(logname, timestamp_info):
             data = json.loads(value.strip())
         except:
             continue
+        # Remove duplicates
         ts = data.get('wake_time', data.get('boot_time'))
         if ts is None:
             continue
-        last_ts = timestamp_info.get(pcb, (None, 1<<63))
-        if data.get('latest') or last_ts[1] - ts > 36000000000.:
-            timestamp_info[pcb] = last_ts = (d, ts)
-        adj_date = last_ts[0] + (ts - last_ts[1]) / ts_base
+        pcb_info = timestamp_info.setdefault(pcb, [None, 1<<63, [], []])
+        prev_date, prev_ts, recent_ts, pending = pcb_info
+        if ts in recent_ts:
+            continue
+        del recent_ts[100:]
+        recent_ts.insert(0, ts)
+        # Calculate host based timestamp
+        if data.get('latest'):
+            pcb_info[0] = adj_date = d
+            pcb_info[1] = ts
+            # Add any sensor data that lacked a valid timestamp
+            for old_data in pending:
+                old_ts = old_data.get('wake_time', old_data.get('boot_time'))
+                old_adj_date = d + (old_ts - ts) * ts_base
+                for m in MEASUREMENTS:
+                    if m in old_data:
+                        out.append((old_adj_date, pcb, m, old_data[m]))
+            del pending[:]
+        elif prev_ts - ts > 36000000000.:
+            # Timestamp not valid - add to pending list
+            pending.append(data)
+            continue
+        else:
+            adj_date = prev_date + (ts - prev_ts) * ts_base
+        # Store sensor data
         for m in MEASUREMENTS:
             if m in data:
                 out.append((adj_date, pcb, m, data[m]))
     f.close()
-    return sorted(out)
+    return out
 
 def plot_data(data):
     graphs = ['battery', 'temperature', 'humidity']
@@ -98,6 +121,7 @@ def main():
         data.extend(logdata)
     if not data:
         return
+    data.sort()
 
     # Draw graph
     fig = plot_data(data)
