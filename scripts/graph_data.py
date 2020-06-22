@@ -10,7 +10,9 @@ import matplotlib
 # To use this script, create an MQTT log with something like:
 #  mosquitto_sub -F '%I;%t;%p' -t 'topic/data' > mylog &
 
-MEASUREMENTS = ['battery', 'temperature', 'pressure', 'humidity']
+MEASUREMENTS = [
+    'battery', 'temperature', 'pressure', 'humidity', 'last_sleep_time',
+]
 
 def parse_log(logname, timestamp_info, min_date, max_date):
     f = open(logname, 'r')
@@ -52,7 +54,7 @@ def parse_log(logname, timestamp_info, min_date, max_date):
                 old_adj_date = d + secs
                 for m in MEASUREMENTS:
                     if m in old_data:
-                        out.append((old_adj_date, pcb, m, old_data[m]))
+                        out.append((old_adj_date, pcb, m, old_ts, old_data[m]))
             del pending[:]
         elif prev_ts - ts > 36000000000.:
             # Timestamp not valid - add to pending list
@@ -64,14 +66,38 @@ def parse_log(logname, timestamp_info, min_date, max_date):
         # Store sensor data
         for m in MEASUREMENTS:
             if m in data:
-                out.append((adj_date, pcb, m, data[m]))
+                out.append((adj_date, pcb, m, ts, data[m]))
     f.close()
     return out
 
-def plot_data(data):
-    graphs = ['battery', 'temperature', 'humidity']
-    #graphs.append('pressure')
-    labels = ['Volts', 'Temperature (F)', 'Humidity (%)', 'Pressure']
+def calc_wake_time(pdata):
+    smooth_samples = 32
+    times = []
+    data = []
+    cumulative_ticks = []
+    total = 0
+    # Calculate time awake for each network upload
+    for i in range(len(pdata)-1):
+        diff = pdata[i+1][4] - pdata[i][3]
+        awake_time = diff / 1000000.
+        if awake_time < 0. or awake_time > 10.:
+            #print("skip", pdata[i][1], pdata[i][0], pdata[i][3], diff/1000000.)
+            continue
+        if awake_time < .5:
+            continue
+        total += diff
+        cumulative_ticks.append(total)
+        ccount = len(cumulative_ticks)
+        if ccount > smooth_samples:
+            elaps_ticks = total - cumulative_ticks[ccount - smooth_samples - 1]
+            data.append(elaps_ticks / (smooth_samples * 1000000.))
+            times.append(pdata[i][0])
+    return times, data
+
+def plot_data(data, graphs):
+    labels = {'battery': 'Volts', 'temperature': 'Temperature (F)',
+              'pressure': 'Pressure', 'humidity': 'Humidity (%)',
+              'last_sleep_time': 'Upload time'}
     # Extract data
     bypcb = {}
     for d in data:
@@ -81,13 +107,16 @@ def plot_data(data):
     # Build plot
     fig, axes = matplotlib.pyplot.subplots(nrows=len(graphs), sharex=True)
     for pcbname in sorted(bypcb.keys()):
-        for gtype, ax, label in zip(graphs, axes, labels):
+        for gtype, ax in zip(graphs, axes):
             pdata = bypcb[pcbname].get(gtype, [])
-            times = [p[0] for p in pdata]
-            data = [p[3] for p in pdata]
-            if gtype == 'temperature':
-                data = [d * 1.8 + 32.0 for d in data]
-            ax.set_ylabel(label)
+            if gtype == 'last_sleep_time':
+                times, data = calc_wake_time(pdata)
+            else:
+                times = [p[0] for p in pdata]
+                data = [p[4] for p in pdata]
+                if gtype == 'temperature':
+                    data = [d * 1.8 + 32.0 for d in data]
+            ax.set_ylabel(labels[gtype])
             ax.plot_date(times, data, '-', label=pcbname, alpha=0.6)
             ax.grid(True)
     fontP = matplotlib.font_manager.FontProperties()
@@ -111,6 +140,9 @@ def main():
     opts = optparse.OptionParser(usage)
     opts.add_option("-o", "--output", type="string", dest="output",
                     default=None, help="filename of output graph")
+    opts.add_option("-f", "--fields", type="string", dest="fields",
+                    default="battery,temperature,humidity",
+                    help="sensor fields to graph")
     opts.add_option("-m", "--min_date", type="string", dest="min_date",
                     default="2000-01-01", help="minimum date (YYYY-MM-DD)")
     opts.add_option("-M", "--max_date", type="string", dest="max_date",
@@ -123,6 +155,12 @@ def main():
     min_date = datetime.datetime.fromisoformat(options.min_date)
     max_date = datetime.datetime.fromisoformat(options.max_date)
 
+    graphs = [gn.strip() for gn in options.fields.split(',')]
+    for g in graphs:
+        if g not in MEASUREMENTS:
+            opts.error("Invalid field '%s' (available: %s)"
+                       % (g, ", ".join(MEASUREMENTS)))
+
     # Parse data
     timestamp_info = {}
     data = []
@@ -134,7 +172,7 @@ def main():
     data.sort()
 
     # Draw graph
-    fig = plot_data(data)
+    fig = plot_data(data, graphs)
 
     # Show graph
     if options.output is None:
