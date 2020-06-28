@@ -4,7 +4,7 @@
 # Copyright (C) 2020  Kevin O'Connor <kevin@koconnor.net>
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
-import optparse, datetime, math, json
+import optparse, json
 import matplotlib
 
 # To use this script, create an MQTT log with something like:
@@ -12,7 +12,7 @@ import matplotlib
 
 MEASUREMENTS = ['battery', 'temperature', 'pressure', 'humidity']
 
-def parse_log(logname, timestamp_info):
+def parse_log(logname, timestamp_info, min_date, max_date):
     f = open(logname, 'r')
     ts_base = 1. / (24. * 60. * 60. * 1000000.)
     out = []
@@ -25,6 +25,8 @@ def parse_log(logname, timestamp_info):
         topicparts = topic.split('/')
         try:
             d = matplotlib.dates.datestr2num(datestr)
+            if d < min_date or d > max_date:
+                continue
             pcb = topicparts[-2]
             data = json.loads(value.strip())
         except:
@@ -107,17 +109,23 @@ def main():
     opts = optparse.OptionParser(usage)
     opts.add_option("-o", "--output", type="string", dest="output",
                     default=None, help="filename of output graph")
+    opts.add_option("-m", "--min_date", type="string", dest="min_date",
+                    default="2000-01-01", help="minimum date (YYYY-MM-DD)")
+    opts.add_option("-M", "--max_date", type="string", dest="max_date",
+                    default="9998-12-31", help="maximum date (YYYY-MM-DD)")
     options, args = opts.parse_args()
     if len(args) < 1:
         opts.error("Incorrect number of arguments")
 
     setup_matplotlib(options.output is not None)
+    min_date = matplotlib.dates.datestr2num(options.min_date)
+    max_date = matplotlib.dates.datestr2num(options.max_date)
 
     # Parse data
     timestamp_info = {}
     data = []
     for logname in args:
-        logdata = parse_log(logname, timestamp_info)
+        logdata = parse_log(logname, timestamp_info, min_date, max_date)
         data.extend(logdata)
     if not data:
         return
