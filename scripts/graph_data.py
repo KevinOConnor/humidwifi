@@ -4,7 +4,7 @@
 # Copyright (C) 2020  Kevin O'Connor <kevin@koconnor.net>
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
-import optparse, json
+import optparse, json, datetime
 import matplotlib
 
 # To use this script, create an MQTT log with something like:
@@ -24,7 +24,7 @@ def parse_log(logname, timestamp_info, min_date, max_date):
         datestr, topic, value = parts
         topicparts = topic.split('/')
         try:
-            d = matplotlib.dates.datestr2num(datestr)
+            d = datetime.datetime.fromisoformat(datestr.split('+')[0])
             if d < min_date or d > max_date:
                 continue
             pcb = topicparts[-2]
@@ -48,7 +48,8 @@ def parse_log(logname, timestamp_info, min_date, max_date):
             # Add any sensor data that lacked a valid timestamp
             for old_data in pending:
                 old_ts = old_data.get('wake_time', old_data.get('boot_time'))
-                old_adj_date = d + (old_ts - ts) * ts_base
+                secs = datetime.timedelta(seconds=(old_ts - ts) * ts_base)
+                old_adj_date = d + secs
                 for m in MEASUREMENTS:
                     if m in old_data:
                         out.append((old_adj_date, pcb, m, old_data[m]))
@@ -58,7 +59,8 @@ def parse_log(logname, timestamp_info, min_date, max_date):
             pending.append(data)
             continue
         else:
-            adj_date = prev_date + (ts - prev_ts) * ts_base
+            secs = datetime.timedelta(seconds=(ts - prev_ts) * ts_base)
+            adj_date = prev_date + secs
         # Store sensor data
         for m in MEASUREMENTS:
             if m in data:
@@ -118,8 +120,8 @@ def main():
         opts.error("Incorrect number of arguments")
 
     setup_matplotlib(options.output is not None)
-    min_date = matplotlib.dates.datestr2num(options.min_date)
-    max_date = matplotlib.dates.datestr2num(options.max_date)
+    min_date = datetime.datetime.fromisoformat(options.min_date)
+    max_date = datetime.datetime.fromisoformat(options.max_date)
 
     # Parse data
     timestamp_info = {}
