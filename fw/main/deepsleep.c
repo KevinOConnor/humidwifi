@@ -66,7 +66,7 @@ deepsleep_task(void *pvParameter)
     // Enter deepsleep
     esp_wifi_stop();
     esp_deep_sleep_disable_rom_logging();
-    esp_sleep_enable_timer_wakeup(CONFIG_MEASURE_INTERVAL * 1000000);
+    esp_sleep_enable_timer_wakeup(CONFIG_MEASURE_INTERVAL * 1000000ULL);
     last_deepsleep_time = get_usecs();
     esp_deep_sleep_start();
 }
@@ -79,7 +79,7 @@ deepsleep_init(void)
     int cause = esp_sleep_get_wakeup_cause();
     last_wake_from_sleep = (cause == ESP_SLEEP_WAKEUP_TIMER);
 
-    force_deepsleep_time = last_wake_time + CONFIG_MAX_RUN_TIME * 1000000;
+    force_deepsleep_time = last_wake_time + CONFIG_MAX_RUN_TIME * 1000000ULL;
     xTaskCreate(&deepsleep_task, "deepsleep_task", 8192, NULL, 9
                 , &deepsleep_task_id);
 }
@@ -87,7 +87,7 @@ deepsleep_init(void)
 void
 deepsleep_note_ota_start(void)
 {
-    force_deepsleep_time = last_wake_time + CONFIG_MAX_OTA_TIME * 1000000;
+    force_deepsleep_time = last_wake_time + CONFIG_MAX_OTA_TIME * 1000000ULL;
 }
 
 void

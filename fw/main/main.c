@@ -84,7 +84,7 @@ app_main(void)
 
     // Check if network upload should be attempted
     if (deepsleep_get_wake_time() >= next_network_time) {
-        uint64_t upload_interval = CONFIG_UPLOAD_INTERVAL * 1000000;
+        uint64_t upload_interval = CONFIG_UPLOAD_INTERVAL * 1000000ULL;
         next_network_time = deepsleep_get_wake_time() + upload_interval;
 
         int ret = network_start();
