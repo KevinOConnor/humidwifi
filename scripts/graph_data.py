@@ -14,7 +14,7 @@ MEASUREMENTS = ['battery', 'temperature', 'pressure', 'humidity']
 
 def parse_log(logname, timestamp_info, min_date, max_date):
     f = open(logname, 'r')
-    ts_base = 1. / (24. * 60. * 60. * 1000000.)
+    ts_base = 1. / 1000000.
     out = []
     for line in f:
         # Parse line
