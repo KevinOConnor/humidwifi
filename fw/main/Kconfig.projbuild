@@ -20,7 +20,7 @@ menu "Application settings for 'humidity wifi' project"
 
     config BATTERY_CHANNEL
         int "ADC2 Channel to measure battery voltage on"
-        default 4
+        default 3
 
     config BATTERY_SCALE
         string "Battery voltage scale"
@@ -50,15 +50,15 @@ menu "Application settings for 'humidity wifi' project"
 
     config BME280_I2C_ADDR
         hex "I2C address of BME280 chip"
-        default 0x76
+        default 0x77
 
     config BME280_SDA_GPIO
         int "GPIO pin number of the line connected to BME280 SDA pin"
-        default 15
+        default 22
 
     config BME280_SCL_GPIO
         int "GPIO pin number of the line connected to BME280 SCL pin"
-        default 4
+        default 23
 
     endmenu
 
