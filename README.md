@@ -8,6 +8,8 @@ This is an experiment. There is no support for this project.
 
 ![pcb_back](docs/img/pcb_back.jpg)
 
+![case](docs/img/case.jpg)
+
 There is some information on the pcb design in the
 [pcb document](docs/PCB.md).
 

@@ -17,3 +17,5 @@ Case
 The design for a plastic case can be found in the [case/](../case/)
 directory. It can be printed using a 3d-printer. The case was designed
 using [OpenSCAD](https://www.openscad.org/).
+
+![case](img/case.jpg)
