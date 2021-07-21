@@ -2,9 +2,9 @@ The PCB design files can be found in the [pcb/](../pcb/) directory.
 The boards were designed using [KiCad](https://kicad-pcb.org/) and
 manufactured using [JLC PCB](https://jlcpcb.com/).
 
-![pcb_render_front](pics/pcb_render_front.png)
+![pcb_render_front](img/pcb_render_front.png)
 
-![pcb_render_rear](pics/pcb_render_rear.png)
+![pcb_render_rear](img/pcb_render_rear.png)
 
 The board is designed to use a 3.2V LiFePO4 battery. The device will
 not function properly with a 3.7V Lithium battery nor with a regular
