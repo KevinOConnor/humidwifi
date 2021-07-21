@@ -1,6 +1,6 @@
 // Case for storing humidity sensor
 //
-// Copyright (C) 2020  Kevin O'Connor <kevin@koconnor.net>
+// Copyright (C) 2020-2021  Kevin O'Connor <kevin@koconnor.net>
 //
 // This file may be distributed under the terms of the GNU GPLv3 license.
 
@@ -10,24 +10,25 @@
 pcb_width = 28;
 pcb_thick = 1.6;
 pcb_length = 60;
-batt_thick = 20;
+batt_thick = 18.5;
 esp_thick = 3.5;
-extra_thick = 2;
+extra_thick = 0;
 wall_width = 2;
 guide_diamenter = 2;
 lid_height = 3;
 lid_diameter = 2;
-air_hole_diameter = 5;
+air_hole_diameter = 3.5;
 slack = 0.5;
 CUT = 0.01;
+$fs = 0.5;
 
 module lid_frame(width, thick) {
     taper = 3;
-    module rpoint(x1, y1) {
-        translate([x1, y1, lid_diameter/2])
-            sphere(d=lid_diameter, $fs=.5);
-    }
     module raw_lid() {
+        module rpoint(x1, y1) {
+            translate([x1, y1, lid_diameter/2])
+                sphere(d=lid_diameter);
+        }
         hull() {
             rpoint(0, 0);
             rpoint(0, thick-taper);
@@ -42,10 +43,12 @@ module lid_frame(width, thick) {
         }
     }
     module dimples() {
-        dimple_diameter = 1;
-        translate([-dimple_diameter, thick-taper-3, -CUT])
+        dimple_diameter = 1.5;
+        x_offset = lid_diameter/2;
+        y_pos = thick - taper - 3;
+        translate([-x_offset, y_pos, -CUT])
             cylinder(h=lid_height + 2*CUT, d=dimple_diameter, $fs=.1);
-        translate([width+dimple_diameter, thick-taper-3, -CUT])
+        translate([width + x_offset, y_pos, -CUT])
             cylinder(h=lid_height + 2*CUT, d=dimple_diameter, $fs=.1);
     }
     difference() {
@@ -58,8 +61,9 @@ module lid_frame(width, thick) {
 }
 
 module battery_air_hole(x, y) {
+    batt_air_hole_diameter = 5;
     translate([x, y, -CUT])
-        cylinder(h=lid_height + 2*CUT, d=air_hole_diameter, $fs=.5);
+        cylinder(h=lid_height + 2*CUT, d=batt_air_hole_diameter);
 }
 
 batt_hole_y = extra_thick + esp_thick + pcb_thick + wall_width + batt_thick/2;
@@ -92,13 +96,13 @@ module case() {
         front_place = wall_width;
         rear_place = wall_width + width;
         translate([front_place, top_space, z+wall_width])
-            sphere(d=guide_diamenter, $fs=.5);
+            sphere(d=guide_diamenter);
         translate([front_place, top_space + guide_space, z+wall_width])
-            sphere(d=guide_diamenter, $fs=.5);
+            sphere(d=guide_diamenter);
         translate([rear_place, top_space, z+wall_width])
-            sphere(d=guide_diamenter, $fs=.5);
+            sphere(d=guide_diamenter);
         translate([rear_place, top_space + guide_space, z+wall_width])
-            sphere(d=guide_diamenter, $fs=.5);
+            sphere(d=guide_diamenter);
     }
     module main_box() {
         box();
@@ -107,21 +111,28 @@ module case() {
         pcb_guide(pcb_length-15);
         pcb_guide(pcb_length-4);
     }
-    module air_hole(x, z) {
-        translate([x+wall_width, -CUT, z+wall_width])
-            rotate([-90, 0, 0])
-                cylinder(h=wall_width + 2*CUT, d=air_hole_diameter, $fs=.5);
-    }
-    module air_holes(zlist) {
-        for (z=zlist) {
-            air_hole(4, z);
-            air_hole(width/2, z);
-            air_hole(width-4, z);
+    module air_holes(xpos_list, zpos_list) {
+        module air_hole(x, z) {
+            translate([x, -CUT, z])
+                rotate([-90, 0, 0])
+                    cylinder(h=wall_width + 2*CUT, d=air_hole_diameter);
+        }
+        center_x = (width + two_wall) / 2;
+        center_z = (height + wall_width) / 2;
+        gap = 2 * air_hole_diameter;
+        for (xpos=xpos_list) {
+            x = center_x + gap * xpos;
+            for (zpos=zpos_list) {
+                z = center_z + gap * zpos;
+                air_hole(x, z);
+            }
         }
     }
     difference() {
         main_box();
-        air_holes([8, 18, 28, 38, 48]);
+        air_xlist = [-1.5, -0.5, .5, 1.5];
+        air_zlist = [-3.5, -2.5, -1.5, -0.5, .5, 1.5, 2.5, 3.5];
+        air_holes(air_xlist, air_zlist);
         battery_air_hole(wall_width + slack / 2 + 6, batt_hole_y);
         battery_air_hole(width + wall_width - slack / 2 - 6, batt_hole_y);
     }
