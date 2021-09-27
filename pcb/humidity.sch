@@ -14,49 +14,18 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Sensor:BME280 U1
-U 1 1 5DFF8CEA
-P 2100 1950
-F 0 "U1" H 1671 1996 50  0000 R CNN
-F 1 "BME280" H 1671 1905 50  0000 R CNN
-F 2 "Package_LGA:Bosch_LGA-8_2.5x2.5mm_P0.65mm_ClockwisePinNumbering" H 3600 1500 50  0001 C CNN
-F 3 "https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BME280-DS002.pdf" H 2100 1750 50  0001 C CNN
-F 4 "C92489" H 2100 1950 50  0001 C CNN "LCSC"
-	1    2100 1950
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR03
 U 1 1 5DFFA7FA
-P 2100 2750
-F 0 "#PWR03" H 2100 2500 50  0001 C CNN
-F 1 "GND" H 2105 2577 50  0000 C CNN
-F 2 "" H 2100 2750 50  0001 C CNN
-F 3 "" H 2100 2750 50  0001 C CNN
-	1    2100 2750
+P 2200 2750
+F 0 "#PWR03" H 2200 2500 50  0001 C CNN
+F 1 "GND" H 2205 2577 50  0000 C CNN
+F 2 "" H 2200 2750 50  0001 C CNN
+F 3 "" H 2200 2750 50  0001 C CNN
+	1    2200 2750
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	2000 2550 2000 2750
-Wire Wire Line
-	2000 2750 2100 2750
 Wire Wire Line
 	2200 2550 2200 2750
-Wire Wire Line
-	2200 2750 2100 2750
-Connection ~ 2100 2750
-$Comp
-L Device:CP_Small C1
-U 1 1 5DFFB31B
-P 1600 1100
-F 0 "C1" H 1688 1146 50  0000 L CNN
-F 1 "100nF" H 1688 1055 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0402_1005Metric" H 1600 1100 50  0001 C CNN
-F 3 "~" H 1600 1100 50  0001 C CNN
-F 4 "" H 1600 1100 50  0001 C CNN "LCSC"
-	1    1600 1100
-	1    0    0    -1  
-$EndComp
 $Comp
 L Device:CP_Small C3
 U 1 1 5DFFC2E3
@@ -65,14 +34,12 @@ F 0 "C3" H 2538 1146 50  0000 L CNN
 F 1 "100nF" H 2538 1055 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0402_1005Metric" H 2450 1100 50  0001 C CNN
 F 3 "~" H 2450 1100 50  0001 C CNN
-F 4 "" H 2450 1100 50  0001 C CNN "LCSC"
+F 4 "C1525" H 2450 1100 50  0001 C CNN "LCSC"
 	1    2450 1100
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
 	2450 950  2450 1000
-Wire Wire Line
-	1600 950  1600 1000
 $Comp
 L power:GND #PWR04
 U 1 1 5DFFCEEF
@@ -84,40 +51,18 @@ F 3 "" H 2450 1250 50  0001 C CNN
 	1    2450 1250
 	1    0    0    -1  
 $EndComp
-$Comp
-L power:GND #PWR01
-U 1 1 5DFFD77E
-P 1600 1200
-F 0 "#PWR01" H 1600 950 50  0001 C CNN
-F 1 "GND" H 1605 1027 50  0000 C CNN
-F 2 "" H 1600 1200 50  0001 C CNN
-F 3 "" H 1600 1200 50  0001 C CNN
-	1    1600 1200
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	2450 1200 2450 1250
 Wire Wire Line
-	2200 1350 2200 950 
+	2200 1650 2200 950 
 Connection ~ 2200 950 
 Wire Wire Line
 	2200 950  2450 950 
-Wire Wire Line
-	2000 1350 2000 950 
-Connection ~ 2000 950 
-Wire Wire Line
-	2000 950  1600 950 
 Connection ~ 2450 950 
-Wire Wire Line
-	3450 2250 3450 1350
-Wire Wire Line
-	2700 2250 3450 2250
-Text GLabel 2950 1850 2    50   Input ~ 0
+Text GLabel 3450 1950 2    50   Input ~ 0
 SCL
-Text GLabel 2950 2050 2    50   Input ~ 0
+Text GLabel 2950 1850 2    50   Input ~ 0
 SDA
-Wire Wire Line
-	2700 2050 2850 2050
 $Comp
 L Device:R_Small R2
 U 1 1 5E00CAB2
@@ -147,22 +92,16 @@ $EndComp
 Wire Wire Line
 	2900 1850 2950 1850
 Wire Wire Line
-	2850 2050 2850 1950
-Wire Wire Line
-	2850 1950 3250 1950
+	2600 1950 3250 1950
 Wire Wire Line
 	3250 1950 3250 1650
-Connection ~ 2850 2050
 Wire Wire Line
-	2850 2050 2950 2050
-Wire Wire Line
-	2700 1850 2900 1850
+	2600 1850 2900 1850
 Connection ~ 2900 1850
 Wire Wire Line
 	2900 1450 2900 1350
 Wire Wire Line
 	2900 1350 3250 1350
-Connection ~ 3450 1350
 Wire Wire Line
 	3450 1350 3450 950 
 Wire Wire Line
@@ -296,7 +235,7 @@ F 0 "C2" H 2388 4546 50  0000 L CNN
 F 1 "100nF" H 2388 4455 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0402_1005Metric" H 2300 4500 50  0001 C CNN
 F 3 "~" H 2300 4500 50  0001 C CNN
-F 4 "" H 2300 4500 50  0001 C CNN "LCSC"
+F 4 "C1525" H 2300 4500 50  0001 C CNN "LCSC"
 	1    2300 4500
 	1    0    0    -1  
 $EndComp
@@ -328,9 +267,9 @@ Wire Wire Line
 	2700 4100 2700 4300
 Wire Wire Line
 	2700 3750 2700 3900
-Text GLabel 4600 5800 2    50   Input ~ 0
-SDA
 Text GLabel 4600 5900 2    50   Input ~ 0
+SDA
+Text GLabel 4600 5800 2    50   Input ~ 0
 SCL
 Text GLabel 4850 4900 2    50   Input ~ 0
 LED
@@ -473,10 +412,7 @@ Connection ~ 5100 3400
 Wire Wire Line
 	5100 3400 5350 3400
 Wire Wire Line
-	2000 950  2100 950 
-Wire Wire Line
 	2100 850  2100 950 
-Connection ~ 2100 950 
 Wire Wire Line
 	2100 950  2200 950 
 Wire Wire Line
@@ -558,15 +494,6 @@ F 3 "" H 6200 6100 50  0001 C CNN
 	1    6200 6100
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	2450 950  2800 950 
-Wire Wire Line
-	2700 1650 2800 1650
-Wire Wire Line
-	2800 1650 2800 950 
-Connection ~ 2800 950 
-Wire Wire Line
-	2800 950  3450 950 
 $Comp
 L Switch:SW_Push SW1
 U 1 1 60D395E4
@@ -669,4 +596,37 @@ Text GLabel 4600 4500 2    50   Input ~ 0
 IO2
 Text GLabel 6700 5400 0    50   Input ~ 0
 IO2
+$Comp
+L Sensor_Humidity:SHT31-DIS U1
+U 1 1 6151A252
+P 2200 1950
+F 0 "U1" H 2200 2431 50  0000 C CNN
+F 1 "SHT31-DIS" H 2200 2340 50  0000 C CNN
+F 2 "Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm" H 2200 2000 50  0001 C CNN
+F 3 "https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Datasheets/Sensirion_Humidity_Sensors_SHT3x_Datasheet_digital.pdf" H 2200 2000 50  0001 C CNN
+F 4 "C453460" H 2200 1950 50  0001 C CNN "LCSC"
+	1    2200 1950
+	1    0    0    -1  
+$EndComp
+NoConn ~ 2600 2050
+NoConn ~ 1800 1950
+Wire Wire Line
+	1800 1850 1500 1850
+Wire Wire Line
+	1500 1850 1500 2550
+Wire Wire Line
+	1500 2550 1800 2550
+Wire Wire Line
+	1800 2050 1800 2550
+Connection ~ 1800 2550
+Wire Wire Line
+	1800 2550 2200 2550
+Wire Wire Line
+	2200 2250 2200 2550
+Connection ~ 2200 2550
+Wire Wire Line
+	3450 1950 3250 1950
+Connection ~ 3250 1950
+Wire Wire Line
+	2450 950  3450 950 
 $EndSCHEMATC
