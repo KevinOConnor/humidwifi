@@ -1,5 +1,5 @@
 The PCB design files can be found in the [pcb/](../pcb/) directory.
-The boards were designed using [KiCad](https://kicad-pcb.org/) and
+The boards were designed using [KiCad](https://kicad.org/) and
 manufactured using [JLC PCB](https://jlcpcb.com/).
 
 ![pcb_render_front](img/pcb_render_front.png)
