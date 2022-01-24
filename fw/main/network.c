@@ -12,6 +12,8 @@
 #include "network.h" // network_connect
 #include "sdkconfig.h" // CONFIG_WIFI_SSID
 
+#define HOSTNAME CONFIG_MQTT_TOPIC_PREFIX
+
 static const char *TAG = "NETWORK";
 
 // Initialize esp32 core functions
@@ -69,6 +71,12 @@ ip_init(void)
     esp_netif_t *netif = esp_netif_create_default_wifi_sta();
     if (!netif)
         goto fail;
+
+    ret = esp_netif_set_hostname(netif, HOSTNAME);
+
+    if (ret)
+        goto fail;
+
     if (deepsleep_get_wake_time() >= Last_ip_valid_time) {
         ret = esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP
                                          , &on_got_ip, netif);
