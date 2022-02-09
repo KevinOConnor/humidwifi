@@ -59,6 +59,26 @@ fail:
     ESP_LOGW(TAG, "Error in on_got_ip %d", ret);
 }
 
+// Setup a default dhcp hostname
+static int
+setup_hostname(esp_netif_t *netif)
+{
+    char hostname[256], *d = hostname, *s = CONFIG_MQTT_TOPIC_PREFIX;
+    // Convert any special characters to '-'
+    int i;
+    for (i = 0; i < sizeof(hostname)-1; i++) {
+        char c = *s++;
+        if (!c)
+            break;
+        if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+              || (c >= '0' && c <= '9')))
+            c = '-';
+        *d++ = c;
+    }
+    *d++ = '\0';
+    return esp_netif_set_hostname(netif, hostname);
+}
+
 // Initialize tcp/ip
 static int
 ip_init(void)
@@ -68,6 +88,9 @@ ip_init(void)
         goto fail;
     esp_netif_t *netif = esp_netif_create_default_wifi_sta();
     if (!netif)
+        goto fail;
+    ret = setup_hostname(netif);
+    if (ret)
         goto fail;
     if (deepsleep_get_wake_time() >= Last_ip_valid_time) {
         ret = esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP
